@@ -1,7 +1,6 @@
 import { setBlockTracking } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import MainTodo from '/src/pages/MainTodo.vue';
-import Blog from '/src/pages/Blog.vue';
 import NotFound from '/src/pages/NotFound.vue';
 
 const routes = [
@@ -21,9 +20,14 @@ const routes = [
     component: () => import('/src/pages/About.vue'),
   },
   {
+    path: '/blog/:id',
+    name: 'BlogId',
+    component: () => import('/src/pages/Blog.vue'),
+  },
+  {
     path: '/blog',
     name: 'Blog',
-    component: Blog,
+    component: () => import('/src/pages/Blog.vue'),
   },
   {
     path: '/:pathMatch(.*)*', // 存在しないアドレスのマッチ
