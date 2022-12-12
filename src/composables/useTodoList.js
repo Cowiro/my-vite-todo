@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 export const useTodoList = () => {
   // 初期化
@@ -17,7 +17,7 @@ export const useTodoList = () => {
   // 追加
   const add = (task) => {
     const id = new Date().getTime();
-    todoListRef.value.push({ id: id, task: task });
+    todoListRef.value.push({ id: id, task: task, checked: false });
     localStorage.todoList = JSON.stringify(todoListRef.value);
   };
 
@@ -59,9 +59,15 @@ export const useTodoList = () => {
 
     // TODOリストから完了したタスクを削除
     const idx = findIndexById(id);
-    todoListRef.value.splice(idx, 1);
+    todoListRef.value.splice(idx, 1, todo);
     localStorage.todoList = JSON.stringify(todoListRef.value);
   };
 
-  return { todoListRef, add, show, edit, del, check };
+  const countFin = computed(() => {
+    console.log('computed');
+    const finArr = todoListRef.value.filter((todo) => todo.checked);
+    return finArr.length;
+  });
+
+  return { todoListRef, add, show, edit, del, check, countFin };
 };
