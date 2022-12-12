@@ -40,9 +40,9 @@ const changeCheck = (id) => {
       v-model="todoRef"
       placeholder="＋ TODOを入力"
     />
-    <BaseButton color="green" @click="editTodo" v-if="isEditRef"
-      >変更</BaseButton
-    >
+    <BaseButton color="green" @click="editTodo" v-if="isEditRef">
+      変更
+    </BaseButton>
     <ButtonAdd @on-click="addTodo" v-else />
   </div>
 
