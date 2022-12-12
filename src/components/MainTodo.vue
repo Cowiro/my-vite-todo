@@ -3,45 +3,30 @@ import { ref } from 'vue';
 import { useTodoList } from '/src/composables/useTodoList.js';
 
 const todoRef = ref('');
-const todoListRef = ref([]);
-const ls = localStorage.todoList;
 const isEditRef = ref(false);
-let editId = -1;
+const { todoListRef, add, show, edit, del, check } = useTodoList();
 
-todoListRef.value = ls ? JSON.parse(ls) : [];
-
-const editTodo = () => {
-  const todo = todoListRef.value.find((todo) => todo.id === editId);
-  const idx = todoListRef.value.findIndex((todo) => todo.id === editId);
-
-  todo.task = todoRef.value;
-  todoListRef.value.splice(idx, 1, todo);
-  localStorage.todoList = JSON.stringify(todoListRef.value);
-
-  // 初期化
-  isEditRef.value = false;
-  editId = -1;
-  todoRef.value = '';
-};
+// useTodoListにTodoの操作ロジックを分離
+// todoRefやisEditRefに関する操作はコンポーネント内の処理のため分離しない
 const addTodo = () => {
-  const id = new Date().getTime();
-  todoListRef.value.push({ id: id, task: todoRef.value });
-  localStorage.todoList = JSON.stringify(todoListRef.value);
-
+  add(todoRef.value);
   todoRef.value = '';
 };
 const showTodo = (id) => {
-  const todo = todoListRef.value.find((todo) => todo.id === id);
-  todoRef.value = todo.task;
+  todoRef.value = show(id);
   isEditRef.value = true;
-  editId = id;
+};
+const editTodo = () => {
+  edit(todoRef.value);
+
+  isEditRef.value = false;
+  todoRef.value = '';
 };
 const deleteTodo = (id) => {
-  const { todo, idx } = useTodoList(id);
-  const delMsg = '「' + todo.task + '」を削除しますか？';
-  if (!confirm(delMsg)) return;
-  todoListRef.value.splice(idx, 1);
-  localStorage.todoList = JSON.stringify(todoListRef.value);
+  del(id);
+};
+const changeCheck = (id) => {
+  check(id);
 };
 </script>
 
@@ -60,7 +45,11 @@ const deleteTodo = (id) => {
   <div class="box_list">
     <div class="todo_list" v-for="todo in todoListRef" :key="todo.id">
       <div class="todo">
-        <input type="checkbox" class="check" /><label>{{ todo.task }}</label>
+        <input
+          type="checkbox"
+          class="check"
+          @click="changeCheck(todo.id)"
+        /><label>{{ todo.task }}</label>
       </div>
       <div class="btns">
         <button class="btn green" @click="showTodo(todo.id)">編</button>
