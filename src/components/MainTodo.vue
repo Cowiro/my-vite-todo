@@ -1,14 +1,47 @@
 <script setup>
 import { ref } from 'vue';
+
 const todoRef = ref('');
 const todoListRef = ref([]);
+const ls = localStorage.todoList;
+const isEditRef = ref(false);
+let editId = -1;
 
+todoListRef.value = ls ? JSON.parse(ls) : [];
+
+const editTodo = () => {
+  const todo = todoListRef.value.find((todo) => todo.id === editId);
+  const idx = todoListRef.value.findIndex((todo) => todo.id === editId);
+
+  todo.task = todoRef.value;
+  todoListRef.value.splice(idx, 1, todo);
+  localStorage.todoList = JSON.stringify(todoListRef.value);
+
+  // 初期化
+  isEditRef.value = false;
+  editId = -1;
+  todoRef.value = '';
+};
 const addTodo = () => {
   const id = new Date().getTime();
   todoListRef.value.push({ id: id, task: todoRef.value });
   localStorage.todoList = JSON.stringify(todoListRef.value);
 
   todoRef.value = '';
+};
+const showTodo = (id) => {
+  const todo = todoListRef.value.find((todo) => todo.id === id);
+  todoRef.value = todo.task;
+  isEditRef.value = true;
+  editId = id;
+};
+const deleteTodo = (id) => {
+  const todo = todoListRef.value.find((todo) => todo.id === id);
+  const idx = todoListRef.value.findIndex((todo) => todo.id === id);
+  const delMsg = '「' + todo.task + '」を削除しますか？';
+  if (!confirm(delMsg)) return;
+  todoListRef.value.splice(idx, 1);
+  localStorage.todoList = JSON.stringify(todoListRef.value);
 };
 </script>
 
@@ -20,7 +53,20 @@ const addTodo = () => {
       v-model="todoRef"
       placeholder="＋ TODOを入力"
     />
-    <button class="btn" @click="addTodo">追加</button>
+    <button class="btn" @click="editTodo" v-if="isEditRef">変更</button>
+    <button class="btn" @click="addTodo" v-else>追加</button>
+  </div>
+
+  <div class="box_list">
+    <div class="todo_list" v-for="todo in todoListRef" :key="todo.id">
+      <div class="todo">
+        <input type="checkbox" class="check" /><label>{{ todo.task }}</label>
+      </div>
+      <div class="btns">
+        <button class="btn green" @click="showTodo(todo.id)">編</button>
+        <button class="btn pink" @click="deleteTodo(todo.id)">削</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -43,5 +89,44 @@ const addTodo = () => {
   color: #fff;
   text-align: center;
   font-size: 14px;
+}
+
+.box_list {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.todo_list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.todo {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 12px;
+  width: 300px;
+}
+
+.check {
+  border: 1px solid red;
+  transform: scale(1.6);
+  margin: 0 16px 2px 6px;
+}
+
+.btns {
+  display: flex;
+  gap: 4px;
+}
+
+.green {
+  background-color: #00c653;
+}
+
+.pink {
+  background-color: #ff4081;
 }
 </style>
